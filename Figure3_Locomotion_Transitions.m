@@ -12,6 +12,8 @@ Video={'5gc_short.avi',...
     '4gc.avi',...
     '00079_6.avi'};
 
+figure
+
 for i=1:length(Video)
     Plot_locomotion_parameters(Video{i},i)
 

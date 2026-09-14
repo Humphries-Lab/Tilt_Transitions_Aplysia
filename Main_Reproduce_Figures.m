@@ -1,0 +1,10 @@
+function Main_Reproduce_Figures
+
+Figure1_transitions_match
+
+Figure3_Locomotion_Transitions
+
+Figure4_Model
+
+
+end
