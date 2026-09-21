@@ -29,7 +29,7 @@ function Plot_locomotion_parameters(VideoName,column)
 %   VideoName - Name of the video associated with the tracking data.
 %   column    - Subplot column assigned to the video.
 
-load(['..\Output_files\' VideoName '_tr.mat'],'p')
+load(['.\Output_files\' VideoName '_tr.mat'],'p')
 
 FrameRate=29.9700;
 cyclesS=p.cycles-p.cycles(1);
@@ -63,7 +63,7 @@ for i=1:numel(cyclesS)-1
 end
 
 
-% Calculate Period of cyle
+% Calculate Period of cycle
 Period=diff(p.cycles);
 
 

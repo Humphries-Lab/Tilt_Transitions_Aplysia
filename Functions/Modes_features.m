@@ -30,8 +30,8 @@ function [Mina,ConR,Period,epochs,features,icycle,epochsNoNan]=Modes_features(Vi
 %
 
 
-load(['..\Output_files\' VideoName '_tr.mat'],'p')
-info = xlsread(['Locomotion_' VideoName(1:end-4) '.xlsx']);
+load(['.\Output_files\' VideoName '_tr.mat'],'p')
+info = xlsread(['.\Output_files\Locomotion_' VideoName(1:end-4) '.xlsx']);
 
 % Align locomotion annotations with the start of the tracking interval.
 TimeEvents=info(:,1)*60+info(:,2);

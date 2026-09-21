@@ -12,7 +12,7 @@ function Mtransitions=transitions_ocurrence(VideoName)
 Mtransitions=zeros(3,3);
 
 %% read manual classification
-info = xlsread(['Locomotion_' VideoName(1:end-4) '.xlsx']);
+info = xlsread(['.\Output_files\Locomotion_' VideoName(1:end-4) '.xlsx']);
 
 locomotion=info(:,4);
 Ncycles=size(locomotion,1);

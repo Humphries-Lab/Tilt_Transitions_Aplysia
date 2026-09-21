@@ -1,10 +1,16 @@
 function Main_Reproduce_Figures
 
-Figure1_transitions_match
+%Detect_epochs_all_recordings
+
+Figure1_Transitions_match
 
 Figure3_Locomotion_Transitions
 
 Figure4_Model
+
+Figure5_Parameters_match
+
+Figures6_and_7_motor_output
 
 
 end
