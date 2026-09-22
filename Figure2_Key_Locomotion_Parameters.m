@@ -1,6 +1,31 @@
 function Figure2_Key_Locomotion_Parameters
+%FIGURE2_KEY_LOCOMOTION_PARAMETERS Analyse locomotion parameters across videos.
+%
+%   FIGURE2_KEY_LOCOMOTION_PARAMETERS performs PCA on the tracked frames
+%   from all available video sessions and summarises the relationship
+%   between the principal components and key locomotion parameters.
+%
+%   The function collects PCA architecture and length measures, behavioural
+%   measures, explained variance, and frequency differences across sessions.
+%   It then generates the panels used to characterise PCA dimensionality,
+%   the correspondence between PCA-derived and behavioural measures, and
+%   the distribution of the principal components associated with each
+%   locomotion parameter.
+%
+%   Video session 10 is excluded from the PCA analysis because it causes an
+%   out-of-memory error during PCA processing.
+%
+%   The video '00081_5.avi' is additionally used to generate representative
+%   reconstructions of the maximum and minimum scores along the first two
+%   principal components.
+%
+%   Notes
+%   -----
+%   The analysis assumes that the corresponding *_tr.mat files are present
+%   in the Output_files directory and contain the variables p and All_f.
+%   A frame rate of 29.97 frames per second is used for all sessions.
+%
 
-%Supp_video_PCs
 
 ff=dir('.\Output_files\*_tr.mat*');
 nsessions=size(ff,1);
@@ -9,28 +34,30 @@ PCarch_all=[];
 PClength_all=[];
 behaviour_all=[];
 nPCs=nan(nsessions-1,2);
-mean_arch=nan(nsessions-1,1);
 counter=1;
 VarExp=nan(20,nsessions);
 diff_freq=nan(nsessions-1,2);
 
 for iVideo=1:nsessions
-
+    disp(['Starting video = ' num2str(iVideo)])
     if iVideo==10
+        %% including this video gives an out of memory error in all computers I've tried when performing PCA
         continue
     end
     VideoName=ff(iVideo).name(1:end-7);
     load(['.\Output_files\' VideoName '_tr.mat'],'p','All_f')
     FrameRate = 29.97;
+
+    % plot results for example video (Figure 2)
     if strcmp(VideoName,'00081_5.avi')
         do_plot=1;
     else
         do_plot=0;
     end
 
-    [coeffs,scores,PCarch,PClength,behaviour,nPCs(counter,:),mean_arch(counter),VarexpTmp,diff_freq(counter,:)]=PCA_from_frames(All_f,FrameRate,p,do_plot);
+    [coeffs,scores,PCarch,PClength,behaviour,nPCs(counter,:),VarexpTmp,diff_freq(counter,:)]=PCA_from_frames(All_f,FrameRate,p,do_plot);
 
-    
+    % plot reconstructions of frames from eigenslug
     if do_plot
         meanFrame=mean(All_f);
 
@@ -50,6 +77,33 @@ for iVideo=1:nsessions
         subplot(8,4,7)
         MinPC2=[0 min(scores(:,nPC))];
         PCA2frame(coeffs(:,1:2),MinPC2,meanFrame,p)
+
+        %% plot example of reconstruction of gallop
+        subplot(8,4,5)
+        tgallop=round((55.7176-p.start_t)*FrameRate);
+        im=reshape(All_f(tgallop,:),p.HB,p.WB);
+
+        imagesc(round(im))
+        yticks([])
+        xticks([])
+        clim([0 1])
+        colormap(flipud(colormap('gray')))
+        set(gca, 'YDir', 'reverse');
+        title('Gallop')
+
+        %% plot example of reconstruction of crawl
+        subplot(8,4,13)
+        tcrawl=round((130.1244-p.start_t)*FrameRate);
+        im=reshape(All_f(tcrawl,:),p.HB,p.WB);
+
+        imagesc(round(im))
+        yticks([])
+        xticks([])
+        clim([0 1])
+        colormap(flipud(colormap('gray')))
+        set(gca, 'YDir', 'reverse');
+        title('Crawl')
+
 
     end
     PCarch_all=[PCarch_all;PCarch];
@@ -73,7 +127,7 @@ ylabel('Variance explained [%]')
 ylim([0 100])
 box off
 
-
+%% correlation between best PC arching and animal's arching
 limits=[min([PCarch_all;behaviour_all(:,2)]) max([PCarch_all;behaviour_all(:,2)])];
 subplot(4,4,15)
 plot(PCarch_all,behaviour_all(:,2))
@@ -81,12 +135,13 @@ hold on
 plot([limits(1) limits(2)],[limits(1) limits(2)],'Color',[0.5 0.5 0.5])
 xlabel('zscore best PC')
 ylabel('zscore Arch')
-text(mean(PCarch_all),mean(behaviour_all(:,2)),['corr = ' num2str(corr(PCarch_all,behaviour_all(:,2)))])
+text(mean(PCarch_all),mean(behaviour_all(:,2)),['corr = ' num2str(corr(PCarch_all,behaviour_all(:,2)),'%.2f')])
 xlim(limits)
 ylim(limits)
 box off
 axis square
 
+%% correlation between best PC length and animal's length
 subplot(4,4,11)
 limits=[min([PClength_all;behaviour_all(:,1)]) max([PClength_all;behaviour_all(:,1)])];
 plot(PClength_all,behaviour_all(:,1))
@@ -94,13 +149,13 @@ hold on
 plot([limits(1) limits(2)],[limits(1) limits(2)],'Color',[0.5 0.5 0.5])
 xlabel('zscore best PC')
 ylabel('zscore length')
-text(mean(PClength_all),mean(behaviour_all(:,1)),['corr = ' num2str(corr(PClength_all,behaviour_all(:,1)))])
+text(mean(PClength_all),mean(behaviour_all(:,1)),['corr = ' num2str(corr(PClength_all,behaviour_all(:,1)),'%.2f')])
 xlim(limits)
 ylim(limits)
 box off
 axis square
 
-
+%% Histogram of the video PC timeseries most correlated length (best length PC)
 subplot(4,4,10)
 hLength=histogram(nPCs(:,2),'Normalization','probability');
 xlabel('Best PC length number')
@@ -108,21 +163,23 @@ ylabel('Frequency')
 
 box off
 
-disp(['Fraction of trials PC1 = Length ' num2str(hLength.Values(1))])
+disp(['Fraction of trials PC1 = Length ' num2str(hLength.Values(1),'%.2f')])
+disp(['Average Var Exp from first 2 PC = ' num2str(mean(sum(VarExp(1:2,:),'omitnan')),'%.2f')])
 
-disp(['Average Var Exp from first 2 PC = ' num2str(mean(sum(VarExp(1:2,:),'omitnan')))])
 
+%% plot frequency of PC vs frequency of animal length
 subplot(4,4,12)
 plot(diff_freq(:,2),diff_freq(:,1),'.','MarkerSize',16)
 hold on
 plot([0 1/5],[0 1/5],'Color',[0.5 0.5 0.5])
 ylabel('Freq Length [Hz]')
 xlabel('Freq Best length PC [Hz]')
-text(0.1,0.9,['corr = ' num2str(corr(1./diff_freq(:,1),1./diff_freq(:,2)))],'Units','normalized')
+text(0.1,0.9,['corr = ' num2str(corr(1./diff_freq(:,1),1./diff_freq(:,2)),'%.2f')],'Units','normalized')
 box off
 axis square
 sum(nPCs(:,1)==nPCs(:,2))
 
+%% Histogram of the video PC timeseries most correlated arching (best arching PC)
 subplot(4,4,14)
 hArch=histogram(nPCs(:,1),'Normalization','probability');
 xlabel('Best PC Arch number')
@@ -130,37 +187,63 @@ ylabel('Frequency')
 box off
 
 
-disp(['Fraction of trials PC1 = Length ' num2str(hArch.Values(1))])
+disp(['Fraction of trials PC1 = Length ' num2str(hArch.Values(1),'%.2f')])
 
-disp(['Percentage of trials showing different PCs = ' num2str(100*sum(abs(nPCs(:,1)-nPCs(:,2))>0)./size(nPCs,1))])
+disp(['Percentage of trials showing different PCs = ' num2str(100*sum(abs(nPCs(:,1)-nPCs(:,2))>0)./size(nPCs,1),'%.2f')])
 toc
 end
 
-function Supp_video_PCs
-VideoName='00081_5.avi';
-load(['.\Output_files\' VideoName '_tr.mat'],'p','All_f')
-FrameRate = 29.97;%VideoReader(VideoName,'CurrentTime',p.start_t);
-do_plot=0;
-[coeffs,scores]=PCA_from_frames(All_f,FrameRate,p,do_plot);
 
-nPC=1;
-reconstruct_frame_3D(coeffs,scores,All_f,p,nPC)
 
-nPC=2;
-reconstruct_frame_3D(coeffs,scores,All_f,p,nPC)
-end
 
 
 function PCA2frame(coeffs,inputs,meanFrame,p)
 
+% PCA2frame Reconstructs and displays a single image from PCA components.
+%
+%   PCA2frame(COEFFS, INPUTS, MEANFRAME, P) reconstructs an image using
+%   principal component analysis (PCA) coefficients and displays the
+%   resulting image as a greyscale image.
+%
+%   The reconstruction is obtained by multiplying the input PCA scores
+%   by the transpose of the coefficient matrix and adding the mean frame.
+%   The resulting vector is then reshaped into an image using the height
+%   and width specified in P.
+%
+%   Inputs:
+%       coeffs    - PCA coefficient matrix used to reconstruct the image.
+%       inputs    - PCA input scores or component weights used for the
+%                   reconstruction. This is an (row) array with as many elements as dimensions.
+%       meanFrame - Mean image/frame added to the PCA reconstruction.
+%       p         - Structure containing the image dimensions:
+%                     p.HB - Height of the reconstructed image.
+%                     p.WB - Width of the reconstructed image.
+%
+%   Outputs:
+%       This function does not return any output arguments. Instead, it
+%       displays the reconstructed image in the current figure.
+%
+%   Display:
+%       The reconstructed image is rounded to the nearest integer and
+%       displayed using a greyscale colour map. The colour limits are set
+%       between 0 and 1, and the x- and y-axis tick marks are removed.
+%       The y-axis direction is reversed to maintain the expected image
+%       orientation.
+%
+%   Example:
+%       PCA2frame(coeffs, inputs, meanFrame, p)
+%
+
+
+%% from scores (here inputs) to frame
 reconstruction=inputs*coeffs'+meanFrame;
 
 im=reshape(reconstruction',p.HB,p.WB);
-   
-    imagesc(round(im))
-    yticks([])
-    xticks([])
-    clim([0 1])
-    colormap(flipud(colormap('gray')))
-    set(gca, 'YDir', 'reverse');
+
+imagesc(round(im))
+yticks([])
+xticks([])
+clim([0 1])
+colormap(flipud(colormap('gray')))
+set(gca, 'YDir', 'reverse');
 end
