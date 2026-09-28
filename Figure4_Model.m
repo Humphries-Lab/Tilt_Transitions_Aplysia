@@ -264,6 +264,9 @@ ylim([0 6])
 
 
 %% Supplementary video
+% Creating the video takes a considerable long time, so we're commenting
+% this for now
+
 %colours_video = [gallopcolour;[0 0 0];[1 0 0];gallopcolour];
 %create_video_comparison( ...
     % timeMs/millisecondsPerSecond, ...

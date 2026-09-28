@@ -90,7 +90,7 @@ function p10_results=P10_predictions(xtime,xtimeb,p10,cycleGan,AmpGan,tilt,FR,pa
 %           tilt,FR,params)
 
 fs=1000/params.bin;
-sample_segmentS=150;
+sample_segmentS=150; %length of sliding window 
 Ncycles=numel(xtimeb)-1;
 FR=FR(:);
 
@@ -100,7 +100,7 @@ envp10=envelope(p10,round(meanP*fs),'peaks');
 
 %% Compute the cycle period using the power spectrum
 
-nfft=1./(100:-1:2);
+nfft=1./(100:-1:2); % max and min period of 100 and 2 s respectively
 window = fs*sample_segmentS;
 noverlap=fs*(sample_segmentS-1);
 [~,f10,tp10,p102]=spectrogram(p10-mean(p10),window,noverlap,nfft,fs,'yaxis');

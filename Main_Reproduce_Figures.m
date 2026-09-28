@@ -4,6 +4,8 @@ function Main_Reproduce_Figures
 
 Figure1_Transitions_match
 
+Figure2_Key_Locomotion_Parameters
+
 Figure3_Locomotion_Transitions
 
 Figure4_Model
