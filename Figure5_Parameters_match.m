@@ -1,6 +1,5 @@
 function Figure5_Parameters_match
 
-figure
 
 Recording={'Mar2916_1.mat',...
    'Jul1119_1.mat',...

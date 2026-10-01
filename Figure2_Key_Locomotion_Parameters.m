@@ -26,10 +26,10 @@ function Figure2_Key_Locomotion_Parameters
 %   A frame rate of 29.97 frames per second is used for all sessions.
 %
 
-
+figure
 ff=dir('.\Output_files\*_tr.mat*');
 nsessions=size(ff,1);
-tic
+
 PCarch_all=[];
 PClength_all=[];
 behaviour_all=[];
@@ -190,7 +190,7 @@ box off
 disp(['Fraction of trials PC1 = Length ' num2str(hArch.Values(1),'%.2f')])
 
 disp(['Percentage of trials showing different PCs = ' num2str(100*sum(abs(nPCs(:,1)-nPCs(:,2))>0)./size(nPCs,1),'%.2f')])
-toc
+
 end
 
 
