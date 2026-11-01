@@ -1,4 +1,4 @@
-function Figure4_Model
+function Figure4_Model(varargin)
 %% FIGURE4_MODEL
 % Simulate locomotion changes driven by low-dimensional neural activity.
 %
@@ -6,6 +6,21 @@ function Figure4_Model
 %   1. Neural amplitude affects animal length.
 %   2. Neural period affects locomotion period.
 %   3. Neural trajectory tilt affects locomotion mode.
+
+
+numArgs = length(varargin);
+% by default plot figure, not video
+do_plot_figure_4 = 1;
+plot_video = 0;
+
+if numArgs==1
+    do_plot_figure_4=varargin{1};
+
+elseif numArgs==2
+    do_plot_figure_4=varargin{1};
+    plot_video = varargin{2};
+end
+
 
 %% Parameters
 
@@ -16,7 +31,7 @@ timeBinMs = 50;
 timeMs = (timeBinMs:timeBinMs:50000)';
 
 transitionTimeSec = 28.5;
-PeriodSec = 10; 
+PeriodSec = 10;
 numTimePoints = numel(timeMs);
 millisecondsPerSecond = 1000;
 
@@ -114,167 +129,175 @@ maxArchTimeIndex = (millisecondsPerSecond/timeBinMs)*23.4;
 
 %% Neural trajectories
 
-% Hypothesis 1: amplitude affects animal length.
-subplot(2,4,1)
+%% Figure 4
 
-plot3(neuralOutputReference(:,1),neuralOutputReference(:,2),neuralOutputReference(:,3),'Color',gallopcolour)
-hold on
-plot3(neuralOutputAmplitude(:,1),neuralOutputAmplitude(:,2),neuralOutputAmplitude(:,3),'Color',[0.5 0.5 0.5])
+if do_plot_figure_4
 
-plot3(neuralOutputReference(maxLengthTimeIndex,1),neuralOutputReference(maxLengthTimeIndex,2),neuralOutputReference(maxLengthTimeIndex,3),'.','Color',gallopcolour,'MarkerSize',12)
-plot3(neuralOutputReference(minLengthTimeIndex,1),neuralOutputReference(minLengthTimeIndex,2),neuralOutputReference(minLengthTimeIndex,3),'.','Color',gallopcolour,'MarkerSize',12)
+    % Hypothesis 1: amplitude affects animal length.
+    subplot(2,4,1)
 
-xlabel('PC 1')
-ylabel('PC 2')
-zlabel('PC 3')
-zlim([min(pcaScores(:,1)) max(pcaScores(:,2))])
+    plot3(neuralOutputReference(:,1),neuralOutputReference(:,2),neuralOutputReference(:,3),'Color',gallopcolour)
+    hold on
+    plot3(neuralOutputAmplitude(:,1),neuralOutputAmplitude(:,2),neuralOutputAmplitude(:,3),'Color',[0.5 0.5 0.5])
 
+    plot3(neuralOutputReference(maxLengthTimeIndex,1),neuralOutputReference(maxLengthTimeIndex,2),neuralOutputReference(maxLengthTimeIndex,3),'.','Color',gallopcolour,'MarkerSize',12)
+    plot3(neuralOutputReference(minLengthTimeIndex,1),neuralOutputReference(minLengthTimeIndex,2),neuralOutputReference(minLengthTimeIndex,3),'.','Color',gallopcolour,'MarkerSize',12)
 
-% Hypothesis 2: neural period affects locomotion period.
-subplot(2,4,2)
-
-plot(timeMs/millisecondsPerSecond,neuralOutputReference(:,1),'Color',gallopcolour)
-hold on
-plot(timeMs/millisecondsPerSecond,neuralOutputSlow(1:numTimePoints,1),'Color','r')
-
-xlabel('Time [s]')
-ylabel('PC 1')
-zlim([min(pcaScores(:,1)) max(pcaScores(:,2))])
-xlim([0 50])
-box off
+    xlabel('PC 1')
+    ylabel('PC 2')
+    zlabel('PC 3')
+    zlim([min(pcaScores(:,1)) max(pcaScores(:,2))])
 
 
-% Hypothesis 3: trajectory tilt affects locomotion mode.
-subplot(2,4,3)
+    % Hypothesis 2: neural period affects locomotion period.
+    subplot(2,4,2)
 
-hold on
+    plot(timeMs/millisecondsPerSecond,neuralOutputReference(:,1),'Color',gallopcolour)
+    hold on
+    plot(timeMs/millisecondsPerSecond,neuralOutputSlow(1:numTimePoints,1),'Color','r')
 
-plot3(neuralOutputTransition(:,1),neuralOutputTransition(:,2),neuralOutputTransition(:,3),'Color',gallopcolour)
-plot3(neuralOutputTransition(maxArchTimeIndex,1),neuralOutputTransition(maxArchTimeIndex,2),neuralOutputTransition(maxArchTimeIndex,3),'.','Color',gallopcolour,'MarkerSize',12)
-
-plot3(neuralOutputCrawl(:,1),neuralOutputReference(:,2),neuralOutputCrawl(:,3),'Color',crawlcolour)
-plot3(neuralOutputTransition(minArchTimeIndex,1),neuralOutputTransition(minArchTimeIndex,2),neuralOutputTransition(minArchTimeIndex,3),'.','Color',crawlcolour,'MarkerSize',12)
-
-xlabel('PC 1')
-ylabel('PC 2')
-zlabel('PC 3')
-zlim([-max(neuralOutputTransition(:,3)) max(neuralOutputTransition(:,3))])
-view(-42,12)
+    xlabel('Time [s]')
+    ylabel('PC 1')
+    zlim([min(pcaScores(:,1)) max(pcaScores(:,2))])
+    xlim([0 50])
+    box off
 
 
-%% Animal shape insets
+    % Hypothesis 3: trajectory tilt affects locomotion mode.
+    subplot(2,4,3)
 
-% Crawl: maximum length.
-axes('Position',[0.18 0.62 0.05 0.07]);
-create_video(skeletonReferenceComputed,maxLengthTimeIndex)
-xlim([-0.5 6])
-ylim([-1 2])
-axis off
+    hold on
 
-% Crawl: minimum length.
-axes('Position',[0.19 0.85 0.05 0.07]);
-create_video(skeletonReferenceComputed,minLengthTimeIndex)
-xlim([-0.5 6])
-ylim([-1 2])
-axis off
+    plot3(neuralOutputTransition(:,1),neuralOutputTransition(:,2),neuralOutputTransition(:,3),'Color',gallopcolour)
+    plot3(neuralOutputTransition(maxArchTimeIndex,1),neuralOutputTransition(maxArchTimeIndex,2),neuralOutputTransition(maxArchTimeIndex,3),'.','Color',gallopcolour,'MarkerSize',12)
 
-% Gallop: minimum arching.
-axes('Position',[0.67 0.65 0.05 0.07]);
-create_video(skeletonTransitionComputed,minArchTimeIndex)
-xlim([-0.5 6]+6)
-ylim([-1 2])
-axis off
+    plot3(neuralOutputCrawl(:,1),neuralOutputReference(:,2),neuralOutputCrawl(:,3),'Color',crawlcolour)
+    plot3(neuralOutputTransition(minArchTimeIndex,1),neuralOutputTransition(minArchTimeIndex,2),neuralOutputTransition(minArchTimeIndex,3),'.','Color',crawlcolour,'MarkerSize',12)
 
-% Gallop: maximum arching.
-axes('Position',[0.54 0.88 0.05 0.07]);
-create_video(skeletonTransitionComputed,maxArchTimeIndex)
-xlim([-0.5 6]+4)
-ylim([-1 2])
-axis off
+    xlabel('PC 1')
+    ylabel('PC 2')
+    zlabel('PC 3')
+    zlim([-max(neuralOutputTransition(:,3)) max(neuralOutputTransition(:,3))])
+    view(-42,12)
 
 
-%% Lower panels
+    %% Animal shape insets
 
-% Example animal configuration.
-subplot(4,4,12)
-create_video(skeletonTransitionComputed,13)
-box off
-xlim([-0.5 8])
-ylim([-0.1 3])
-xlabel('X')
-ylabel('Y')
+    % Crawl: maximum length.
+    axes('Position',[0.18 0.62 0.05 0.07]);
+    create_video(skeletonReferenceComputed,maxLengthTimeIndex)
+    xlim([-0.5 6])
+    ylim([-1 2])
+    axis off
 
+    % Crawl: minimum length.
+    axes('Position',[0.19 0.85 0.05 0.07]);
+    create_video(skeletonReferenceComputed,minLengthTimeIndex)
+    xlim([-0.5 6])
+    ylim([-1 2])
+    axis off
 
-% Muscle lengths.
-subplot(4,4,16)
-plot(timeMs/millisecondsPerSecond,muscleLengthReference)
-legend('M tail','M middle','M neck','M lift')
-box off
-ylim([0 max(muscleLengthReference,[],'all')])
-xlabel('Time [s]')
-xlim([0 max(timeMs)/millisecondsPerSecond])
+    % Gallop: minimum arching.
+    axes('Position',[0.67 0.65 0.05 0.07]);
+    create_video(skeletonTransitionComputed,minArchTimeIndex)
+    xlim([-0.5 6]+6)
+    ylim([-1 2])
+    axis off
 
-
-%% Arching
-
-subplot(4,4,13)
-hold on
-plot(timeMs(1:end-1)/millisecondsPerSecond,skeletonAmplitudeComputed(:,2,3),'Color',[0.5 0.5 0.5])
-xlabel('Time [s]')
-ylabel('Arching')
-box off
-ylim([-0.1 max(skeletonTransitionComputed(:,2,3),[],'all')])
-
-subplot(4,4,14)
-hold on
-plot(timeMs(1:end-1)/millisecondsPerSecond,skeletonSlowComputed(:,2,3),'r')
-ylim([-0.1 max(skeletonTransitionComputed(:,2,3),[],'all')])
-box off
-
-subplot(4,4,15)
-hold on
-plot((1:size(skeletonTransitionComputed,1))*timeBinMs/millisecondsPerSecond,skeletonTransitionComputed(:,2,3),'Color',gallopcolour)
-ylim([-0.1 max(skeletonTransitionComputed(:,2,3),[],'all')])
-box off
+    % Gallop: maximum arching.
+    axes('Position',[0.54 0.88 0.05 0.07]);
+    create_video(skeletonTransitionComputed,maxArchTimeIndex)
+    xlim([-0.5 6]+4)
+    ylim([-1 2])
+    axis off
 
 
-%% Animal length
+    %% Lower panels
 
-subplot(4,4,9)
-plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthReference,'Color',gallopcolour)
-hold on
-plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthAmplitude,'Color',[0.5 0.5 0.5])
-box off
-ylim([0 6])
-ylabel('Animal width [cm]')
-
-subplot(4,4,10)
-plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthReference,'Color',gallopcolour)
-hold on
-plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthSlow,'r')
-box off
-ylim([0 6])
-
-subplot(4,4,11)
-plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthReference,'Color',gallopcolour,'LineWidth',2)
-hold on
-plot((1:size(animalLengthTransition,1))*timeBinMs/millisecondsPerSecond,animalLengthTransition,'--','Color',crawlcolour)
-box off
-ylim([0 6])
+    % Example animal configuration.
+    subplot(4,4,12)
+    create_video(skeletonTransitionComputed,13)
+    box off
+    xlim([-0.5 8])
+    ylim([-0.1 3])
+    xlabel('X')
+    ylabel('Y')
 
 
-%% Supplementary video
-% Creating the video takes a considerable long time, so we're commenting
-% this for now
+    % Muscle lengths.
+    subplot(4,4,16)
+    plot(timeMs/millisecondsPerSecond,muscleLengthReference)
+    legend('M tail','M middle','M neck','M lift')
+    box off
+    ylim([0 max(muscleLengthReference,[],'all')])
+    xlabel('Time [s]')
+    xlim([0 max(timeMs)/millisecondsPerSecond])
 
-%colours_video = [gallopcolour;[0 0 0];[1 0 0];gallopcolour];
-%create_video_comparison( ...
-    % timeMs/millisecondsPerSecond, ...
-    % neuralOutputReference,neuralOutputAmplitude, ...
-    % neuralOutputSlow,neuralOutputTransition, ...
-    % skeletonReferenceComputed,skeletonAmplitudeComputed, ...
-    % skeletonSlowComputed,skeletonTransitionComputed, ...
-    % colours_video)
+
+    %% Arching
+
+    subplot(4,4,13)
+    hold on
+    plot(timeMs(1:end-1)/millisecondsPerSecond,skeletonAmplitudeComputed(:,2,3),'Color',[0.5 0.5 0.5])
+    xlabel('Time [s]')
+    ylabel('Arching')
+    box off
+    ylim([-0.1 max(skeletonTransitionComputed(:,2,3),[],'all')])
+
+    subplot(4,4,14)
+    hold on
+    plot(timeMs(1:end-1)/millisecondsPerSecond,skeletonSlowComputed(:,2,3),'r')
+    ylim([-0.1 max(skeletonTransitionComputed(:,2,3),[],'all')])
+    box off
+
+    subplot(4,4,15)
+    hold on
+    plot((1:size(skeletonTransitionComputed,1))*timeBinMs/millisecondsPerSecond,skeletonTransitionComputed(:,2,3),'Color',gallopcolour)
+    ylim([-0.1 max(skeletonTransitionComputed(:,2,3),[],'all')])
+    box off
+
+
+    %% Animal length
+
+    subplot(4,4,9)
+    plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthReference,'Color',gallopcolour)
+    hold on
+    plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthAmplitude,'Color',[0.5 0.5 0.5])
+    box off
+    ylim([0 6])
+    ylabel('Animal width [cm]')
+
+    subplot(4,4,10)
+    plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthReference,'Color',gallopcolour)
+    hold on
+    plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthSlow,'r')
+    box off
+    ylim([0 6])
+
+    subplot(4,4,11)
+    plot(timeMs(1:end-1)/millisecondsPerSecond,animalLengthReference,'Color',gallopcolour,'LineWidth',2)
+    hold on
+    plot((1:size(animalLengthTransition,1))*timeBinMs/millisecondsPerSecond,animalLengthTransition,'--','Color',crawlcolour)
+    box off
+    ylim([0 6])
+
+end
+
+if plot_video
+    %% Supplementary video
+    % Creating the video takes a considerable long time, so we're commenting
+    % this for now
+
+    colours_video = [gallopcolour;[0 0 0];[1 0 0];gallopcolour];
+    create_video_comparison( ...
+        timeMs/millisecondsPerSecond, ...
+        neuralOutputReference,neuralOutputAmplitude, ...
+        neuralOutputSlow,neuralOutputTransition, ...
+        skeletonReferenceComputed,skeletonAmplitudeComputed, ...
+        skeletonSlowComputed,skeletonTransitionComputed, ...
+        colours_video)
+
+end
 
 end
 

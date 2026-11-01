@@ -1,4 +1,24 @@
-function Create_video_PCs(coeffs,scores,inputs,meanFrame,p)
+function Create_video_PCs(VideoName,nPC)
+
+% plot results for example video (Figure 2)
+load(['.\Output_files\' VideoName '_tr.mat'],'p','All_f','coeffs','scores')
+
+
+% plot reconstructions of frames from eigenslug
+meanFrame=mean(All_f);
+goingup=linspace(min(scores(:,nPC)),max(scores(:,nPC)),100)';
+goingdown=flipud(goingup);
+chosenPC = [goingup;goingdown];
+PCs = zeros(200,3); 
+PCs(:,nPC)=chosenPC;
+
+Make_video(coeffs,scores,PCs,meanFrame,p)
+end
+
+
+
+
+function Make_video(coeffs,scores,inputs,meanFrame,p)
 %CREATE_VIDEO_PCS Visualise PCA reconstruction of image frames.
 %
 %   CREATE_VIDEO_PCS(coeffs,scores,inputs,meanFrame,p,id) reconstructs each
@@ -44,7 +64,10 @@ f1=figure;
 f1.Position = [100 100 1450 450];
 
 % Determine the number of principal components used for reconstruction.
-neigen=size(coeffs,2);
+neigen=size(inputs,2);
+
+% adjust to the number of inputs
+coeffs=coeffs(:,1:neigen);
 
 % The reconstruction is performed for each input frame using the selected
 % principal components and the mean frame.
@@ -73,7 +96,7 @@ for t=1:ninput
     % Show the full PCA trajectory in grey and highlight the portion that
     % has been traversed up to the current frame in black.
     ax2=subplot(neigen,3,(1:neigen)*3-1);
-    hold on 
+    hold on
     plot3(scores(:,1),scores(:,2),scores(:,3),'Color',[0.7 0.7 0.7],'Linewidth',2)
     plot3([min(scores(:,1)) max(scores(:,1))],[0 0],[0 0],'Color',[0.5 0.5 0.5]*0,'Linewidth',2)
     plot3([0 0],[min(scores(:,2)) max(scores(:,2))],[0 0],'Color',[0.5 0.5 0.5]*0,'Linewidth',2)
@@ -85,8 +108,8 @@ for t=1:ninput
     text(-5,0,max(scores(:,3))+2,'PC 3','FontSize',14,'Color',[0.5 0.5 0.5]*0)
     axis off
     view(16.2272,20.3)
-    
-    
+
+
     % Reshape the reconstructed vector into its original image dimensions
     % and display the current frame alongside its PCA representation.
     im=reshape(reconstruction(t,:)',p.HB,p.WB);
@@ -99,7 +122,7 @@ for t=1:ninput
 
     pause(0.1)
     cla(ax2)
-    
+
 end
 
 end

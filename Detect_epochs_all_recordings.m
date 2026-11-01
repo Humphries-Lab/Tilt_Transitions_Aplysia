@@ -1,19 +1,8 @@
 function Detect_epochs_all_recordings
 tic
 
-do_plot=0;
-% figure for LDS
-if do_plot
-    fig3=figure;
-    figure(fig3)
-    subplot(4,1,[3 4])
-    plot([-0.02 0.02],[0 0],'k')
-    plot([0 0],[-0.1 0.1],'k')
-    xlim([-0.0005 0.0005])
+%do_plot=0;
 
-    Colour_rec=Rainbow(nsessions);
-
-end
 
 %(colour_recording,nrec,rec_thresh)
 %% this script searches stable epochs of dynamic activity in all sessions specified
@@ -22,14 +11,13 @@ rng('default')
 
 %addpath('C:\Users\andrea.colins\OneDrive - Universidad Adolfo Ibanez\Documentos\GitHub\Common-Functions-Aplysia')
 
-%addpath(genpath('C:/Users/Acer/Documents/Codes_from_papers/jPCA_ForDistribution/'))
 %addpath(genpath('C:\Users\andrea.colins\OneDrive - Universidad Adolfo Ibanez\Office computer\codes_from_papers\jPCA_ForDistribution'))
 warning('off','stats:pca:ColRankDefX')
 warning('off','MATLAB:load:variableNotFound')
 
 ff=dir('.\Neural_Recordings\*.mat');
 
-NP10rec=8;% hardcoding the number of p10 recordings for simplicity
+NP10rec=8;% hard coding the number of p10 recordings for simplicity
 
 nsessions=size(ff,1);
 
@@ -67,6 +55,8 @@ pmax_re=nan(nsessions,1);
 pmax_imag=nan(nsessions,1);
 epochs_all=cell(nsessions,1);
 epochs_LDS=cell(nsessions,1);
+nsamples=nan(nsessions,1);
+summary_eigs=nan(nsessions,4);% mean x, mean y, std y, std x
 
 
 
@@ -118,49 +108,43 @@ for i=1:nsessions
     %jpc3(counter:counter+nunits(i)-1,:)=Data.jPC3_coeffs;% this array is already weigthed by the variance
     counter=counter+nunits(i);
 
-    if do_plot
-        % LDS
-        [max_eig_re,max_eig_imag,midT]=LDS_per_segment(Data,params);
-        % this
-        % epochs_LDS{i}=clustering_eigs(max_eig_re,midT,Data.startbin);
 
-        %epochs_LDS(i,1:numel(grps_tmp))=grps_tmp;
+    %% LDS
+    [max_eig_re,max_eig_imag,midT]=LDS_per_segment(Data,params);
+    % this
+    epochs_LDS{i}=clustering_eigs(max_eig_re,midT,Data.startbin);
 
-        upto=900;
-        [~,pmax_re(i)]=ttest(max_eig_re(midT<upto));
-        [~,pmax_imag(i)]=ttest(max_eig_imag(midT<upto));
-        [~,pmax_lower(i)]=ttest(max_eig_re(midT<upto),0,'tail','left');
+    upto=200;
+    [~,pmax_re(i)]=ttest(max_eig_re(midT<upto));
+    [~,pmax_imag(i)]=ttest(max_eig_imag(midT<upto));
+    [~,pmax_lower(i)]=ttest(max_eig_re(midT<upto),0,'tail','left');
 
 
 
-        if contains(session,'Mar2916')
-            subplot(4,1,1)
-            hold on
-            plot(midT,movmedian(max_eig_re,5/(midT(2)-midT(1)),'omitnan')) %% smoothing for 10 seconds
-            plot([0 1000],[0 0],'b')
-            hold off
+    if contains(session,'Mar2916')
 
-            subplot(4,1,2)
-            plot(midT,movmedian(max_eig_imag,5/(midT(2)-midT(1)),'omitnan'))
-
-            Colour_rec(i,:)=[0 0 0];
-        end
-
-
-        subplot(4,1,[3 4])
-        hold on
-        nsamples=0.5*sqrt(sum(~isnan(max_eig_imag))); % 2 SEM
-        %plot(max_eig_re,max_eig_imag,'.-k')
-        errorbar(median(max_eig_re(midT<upto),'omitnan'),median(max_eig_imag(midT<upto),'omitnan'),std(max_eig_imag(midT<upto),'omitnan')./nsamples,'.','Color',Colour_rec(i,:))
-        errorbar(median(max_eig_re(midT<upto),'omitnan'),median(max_eig_imag(midT<upto),'omitnan'),std(max_eig_re(midT<upto),'omitnan')./nsamples,'.','horizontal','Color',Colour_rec(i,:))
-
-        if i==nsessions
-            title([num2str(sum(pmax_re<0.05)) ' out of ' num2str(nsessions) ' are contracting/expanding (mean p-value) =' mean(pmax_re) ])
-            disp([num2str(sum(pmax_re<0.05)) ' out of ' num2str(nsessions) ' are contracting/expanding (mean p-value) =' mean(pmax_re) ])
-        end
+        example_t=midT;
+        example_eig_re=movmedian(max_eig_re,5/(midT(2)-midT(1)),'omitnan');
+        example_eig_im=movmedian(max_eig_imag,5/(midT(2)-midT(1)),'omitnan');
 
 
     end
+
+
+    %subplot(4,1,[3 4])
+    %hold on
+    nsamples(i)=0.5*sqrt(sum(~isnan(max_eig_imag)));
+
+    summary_eigs(i,:)=[median(max_eig_re(midT<upto),'omitnan'),median(max_eig_imag(midT<upto),'omitnan'),std(max_eig_imag(midT<upto),'omitnan'),std(max_eig_re(midT<upto),'omitnan')];
+    %errorbar(median(max_eig_re(midT<upto),'omitnan'),median(max_eig_imag(midT<upto),'omitnan'),std(max_eig_imag(midT<upto),'omitnan')./nsamples,'.','Color',Colour_rec(i,:))
+    %errorbar(median(max_eig_re(midT<upto),'omitnan'),median(max_eig_imag(midT<upto),'omitnan'),std(max_eig_re(midT<upto),'omitnan')./nsamples,'.','horizontal','Color',Colour_rec(i,:))
+
+    % if i==nsessions
+    %     title([num2str(sum(pmax_re<0.05)) ' out of ' num2str(nsessions) ' are contracting/expanding (mean p-value) =' mean(pmax_re) ])
+    %     disp([num2str(sum(pmax_re<0.05)) ' out of ' num2str(nsessions) ' are contracting/expanding (mean p-value) =' mean(pmax_re) ])
+    % end
+
+
 
 end
 
@@ -172,12 +156,10 @@ idxs=strfind(current_path,'\');
 side=current_path(idxs(end)+1:end);
 
 
-save(['.\Output_files\key_params_' side '.mat'],'Cycle_period','Amplitude_all','Arching_all','pmax_re','pmax_imag','pmax_lower','nunits')
-save(['.\Output_files\Epochs_all_' side '.mat'],'epochs_all')
-%save('.\Output_files\p10_results.mat','p10_results_all')
-save(['.\Output_files\Epochs_LDS_all_' side '.mat'],'epochs_LDS')
-
-disp(['Mean ISI between ' num2str(min(meanISI)) ' - ' num2str(max(meanISI))])
+save('.\Output_files\key_params.mat','Cycle_period','Amplitude_all','Arching_all','pmax_re','pmax_imag','pmax_lower','nunits')
+save('.\Output_files\Epochs_all.mat','epochs_all')
+save('.\Output_files\p10_results.mat','p10_results_all')
+save('.\Output_files\Epochs_LDS_all.mat','epochs_LDS','nsamples','summary_eigs','example_t','example_eig_im','example_eig_re')
 
 toc
 end

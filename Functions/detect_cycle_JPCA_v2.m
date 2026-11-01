@@ -2,24 +2,19 @@ function [segment_s,startbin,ndim_seg,varExpTh]=detect_cycle_JPCA_v2(total_matri
 start=1;
 nsamples=size(total_matrix_1,1);
 min_seg2=round(min_seg*1000/bin);% in bins
-ndim=4;
-
 % the neural activity must be recurring for at least step_bin bins (forced to be a tenth of the cycle)
 step_bin=round(min_seg*(1000/bin)/10); % a tenth of the minimum cycle (in bins)
-
 endt=round(min_seg2); %in bins now
 segment_s=[];
 ndim_seg=[];
 % we make a copy of the original threshold defined by the user. We can
 % increase the threshold adaptatively in the case that the neural dynamics
 % become higher dimensional, but the minimum threshold will be the one set
-% by the user. This is important because if we keep the recurrence
-% threshold the same, the last (higher dimensional) cycles tend to drift and
-% the end of the cycles is detected after they should. 
+% by the user
 threshold_or=threshold;
 
 [~,scoreall,~,~,explained_all] = pca(total_matrix_1);
-
+ndim=4;
 varExpTh=sum(explained_all(1:ndim));
 
 xtime=(1:nsamples)*bin/1000;
@@ -69,7 +64,36 @@ while endt<=nsamples
         ndim=max(2,tmpdim);
     end
     score2=scorestruct.proj(:,1:ndim);
- 
+    %score1=scorestruct.proj;
+    %      figure
+    %      subplot(2,1,1)
+    %      plot(summary.PCs)
+    %      subplot(2,1,2)
+    %      plot(summary.jPCs)
+    %     pause
+    % how well does jPCA approximate the data?
+    %debugging
+    %     figure
+    %     subplot(2,2,1)
+    %     plot(cumsum(summary.varCaptEachJPC),'r')
+    %     hold on
+    %     plot(cumsum(summary.varCaptEachPC),'k')
+    %     ylabel('Var explained')
+    %     subplot(2,2,2)
+    %     plot(summary.R2_Mskew_2D,'or')
+    %     hold on
+    %     plot(summary.R2_Mbest_2D,'ok')
+    %     ylabel('Fit for 2D')
+    %
+    %     subplot(2,2,3)
+    %     plot(summary.R2_Mskew_kD,'or')
+    %     hold on
+    %     plot(summary.R2_Mbest_kD,'ok')
+    %     ylabel('Fit for all D')
+    %     pause
+    % media filter?
+    %score2=medfilt1(score1(:,1:2),step);
+
     %do recurrence?
     recurrence1=pdist(score2,'euclidean');
     recurrence=squareform(recurrence1);
@@ -77,6 +101,10 @@ while endt<=nsamples
     tmp=recurrence<limit;
     recurrence_time=calculate_time_of_rec(tmp,min_seg2*ones(size(tmp,1),1));
     rec_time=mean(recurrence_time,'omitnan')*bin/1000;
+    %make another sanity test? sometimes the rec_times are bimodal, like 30
+    %and 10 values
+
+
 
 
     if do_plot
@@ -130,5 +158,16 @@ end
 
 
 startbin=round([1; cumsum(segment_s)*1000/bin]);
+% if the segment between the end of the last cycle and the end of the
+% recording is longer than the minimum length, then include it.
+% if  (nsamples-startbin(end))>min_seg2
+%     tmp=(nsamples-startbin(end))*bin/1000;
+%     startbin=[startbin;nsamples];
+%     segment_s=[segment_s; tmp];
+%     ndim_seg=[ndim_seg;nan];
+% end
+
+% I wouldn't apply the code above because that segment be definition is not
+% recurring
 
 end

@@ -206,5 +206,6 @@ subplot(5,4,19)
 plot_PCA_3d_transitions(Data)
 
 %% Summary of automatically defined epochs and transitions
-compare_Neural2Behaviour
+load('.\Output_files\Epochs_all.mat','epochs_all')
+compare_Neural2Behaviour(epochs_all)
 end

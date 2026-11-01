@@ -1,6 +1,8 @@
 function Figure5_Parameters_match
 
 
+f5=figure;
+
 Recording={'Mar2916_1.mat',...
    'Jul1119_1.mat',...
    'Jul0616_2.mat'};
@@ -11,7 +13,8 @@ Recording={'Mar2916_1.mat',...
 
 
 
-figure
+
+figure(f5)
 
 for i=1:length(Recording)
     Plot_neural_cycle_parameters(['.\Neural_Recordings\' Recording{i}],i)
@@ -29,8 +32,6 @@ disp('_________Neural cycle parameters___________')
 disp('___________________________________________')
 
 Figure5_Neural_summary
-
-
 
 end
 
@@ -69,24 +70,14 @@ plot_parameter(Data,Data.segment_s,params)
 ylim([0 80])
 end
 
-function plot_parameter(Data,parameter,params)
-ax=gca;
-xtimeb=cumsum([0;Data.segment_s(1:end-1)]);
-hold on
-    im=imagesc([1 Data.startbin(end)]*params.bin/1000,[0 max(parameter)],Data.group_bin');
-    im.AlphaData=0.1;
-    ylim([0  max(parameter)])
-    colormap(ax,Data.colour_groups)
-    plot(xtimeb,parameter)
-    
-end
+
 
 function Figure5_Neural_summary
 Ngrps=5;
 colours=[1 1 1;plasma(Ngrps)];
 colours(end,:)=[255,230,0]./255;
 
-load('.\Output_files\Epochs_all_Neural_Recordings.mat','Pattern3')
+load('.\Output_files\Epochs_all.mat','Pattern3')
 Key_paramters_all_rec(colours,Pattern3)
 end
 

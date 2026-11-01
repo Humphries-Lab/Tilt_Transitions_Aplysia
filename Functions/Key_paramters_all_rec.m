@@ -1,12 +1,12 @@
 function Key_paramters_all_rec(Colours,Pattern_ord)
 
-load('.\Output_files\key_params_Neural_Recordings.mat','Cycle_period','Amplitude_all','Arching_all')
-load('.\Output_files\Epochs_all_Neural_Recordings.mat','epochs_all')
+load('.\Output_files\key_params.mat','Cycle_period','Amplitude_all','Arching_all')
+load('.\Output_files\Epochs_all.mat','epochs_all')
 
-N_rec=size(epochs_all,2);
+N_rec=length(epochs_all);
 Epochs_all=nan(N_rec,100);
 
- for i=1:size(epochs_all,2)
+ for i=1:N_rec
      Epochs_all(i,1:size(epochs_all{i},1))=epochs_all{i};
  end
 

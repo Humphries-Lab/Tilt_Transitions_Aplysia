@@ -1,4 +1,4 @@
-function compare_Neural2Behaviour
+function compare_Neural2Behaviour(epochs_all)
 %COMPARE_NEURAL2BEHAVIOUR Compare neural epoch sequences across recordings.
 %
 % This function organises the epoch sequences detected in each recording,
@@ -20,12 +20,8 @@ function compare_Neural2Behaviour
 % The function also displays the transition-probability matrix and the
 % behavioural pattern matrix.
 
-%% Input data
 
-% Load the detected neural epochs for all recordings.
-load('.\Output_files\Epochs_all_Neural_Recordings.mat','epochs_all')
-
-N_rec=size(epochs_all,2);
+N_rec=length(epochs_all);
 Pattern=zeros(N_rec,50);
 ngrps=zeros(N_rec,1);
 ncycles=zeros(N_rec,1);
@@ -183,7 +179,7 @@ ylabel('Recording number')
 
 xlim([0,50])
 
-save('.\Output_files\Epochs_all_Neural_Recordings.mat','Pattern3','-append')
+save('.\Output_files\Epochs_all.mat','Pattern3','-append')
 %Key_paramters_all_rec(colours,Pattern3)
 
 end
