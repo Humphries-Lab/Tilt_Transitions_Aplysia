@@ -133,14 +133,14 @@ while endt<=nsamples
 
     %%%% testing if controlling by dimensionality (forcing the threshold to
     %%%% be higher over time when the dimensionality increases) avoid the drift
-    var_this_cycle = sum(summary.varCaptEachPC(1:2));
-    var_all_cycles = [var_all_cycles;var_this_cycle];
-    if numel(var_all_cycles)>0
-        mean_var = mean(diff(var_all_cycles));
-    else
-         mean_var = 0;
-    end
-    threshold=max(threshold-20*mean_var,threshold_or);
+    % var_this_cycle = sum(summary.varCaptEachPC(1:2));
+    % var_all_cycles = [var_all_cycles;var_this_cycle];
+    % if numel(var_all_cycles)>0
+    %     mean_var = mean(diff(var_all_cycles));
+    % else
+    %      mean_var = 0;
+    % end
+    % threshold=max(threshold-20*mean_var,threshold_or);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         if do_plot

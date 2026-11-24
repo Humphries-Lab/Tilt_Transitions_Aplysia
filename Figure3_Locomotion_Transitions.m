@@ -80,6 +80,7 @@ Pchange=isAbrupt(Mina,ipt);
 if Pchange>4
 plot(t_max(ipt),Mina(ipt),'*')
 end
+title(num2str(Pchange))
 
 ylabel('Arching')
 box off

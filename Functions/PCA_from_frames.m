@@ -71,7 +71,7 @@ if exist('explained','var')==0
     scores=scores(:,1:10);
 
     % Save the calculated PCA results so that they can be reused.
-    save(['..\Output_files\' p.VideoName '_tr.mat'],'coeffs','scores','explained','-append')
+    save(['.\Output_files\' p.VideoName '_tr.mat'],'coeffs','scores','explained','-append')
 
 end
 

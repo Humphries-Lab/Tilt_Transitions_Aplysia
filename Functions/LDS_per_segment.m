@@ -3,7 +3,7 @@ function [max_eig_re,max_eig_imag,midT]=LDS_per_segment(Data,params)
 %extrapoints=round((Data.startbin(2:end)+Data.startbin(1:end-1))/2);
 %Data.startbin=sort([Data.startbin;extrapoints],'ascend');
 
-segment_length=30*1000/params.bin; % a minute
+segment_length=60*1000/params.bin; % a minute
 slidW=0.1*1000/params.bin;
 nsegments=floor((size(Data.total_matrix,2)-2*segment_length)/slidW);
 

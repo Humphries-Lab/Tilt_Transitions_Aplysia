@@ -1,4 +1,5 @@
 function Data=Detect_epochs(session,params)
+rng('default')
 do_plot=0;
 load(session,'spks','stim_time','spks_p10')
 
